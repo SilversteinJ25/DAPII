@@ -1,0 +1,608 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Spatial I\"\n",
+        "author: \"Peter Ganong and Maggie Shi\"\n",
+        "date: today\n",
+        "date-format: long\n",
+        "toc: false\n",
+        "execute: \n",
+        "    echo: true\n",
+        "format:\n",
+        "    html:\n",
+        "        toc: false \n",
+        "---\n",
+        "\n",
+        "\n",
+        "<!--\n",
+        " beamer:\n",
+        "    toc: true\n",
+        "    fig-width: 6\n",
+        "    fig-height: 4\n",
+        "    include-in-header: header_pagenrs.tex\n",
+        "include-before-body:\n",
+        "  text: |\n",
+        "    \\RecustomVerbatimEnvironment{verbatim}{Verbatim}{\n",
+        "      showspaces = false,\n",
+        "      showtabs = false,\n",
+        "      breaksymbolleft={},\n",
+        "      breaklines\n",
+        "    }\n",
+        "    -->\n",
+        "\n",
+        "# Introduction (5.2)\n",
+        "\n",
+        "## Intro: roadmap\n",
+        "\n",
+        "-   motivation\n",
+        "-   textbook\n",
+        "-   `requirements.txt`\n",
+        "-   types of geo data\n",
+        "-   attribute data\n",
+        "-   storage for geo data\n",
+        "\n",
+        "## Motivation\n",
+        "\n",
+        "-   For many datasets, the fundamental unit of observation is geographic\n",
+        "    -   a place\n",
+        "    -   a road\n",
+        "    -   a building\n",
+        "    -   a county\n",
+        "-   By the end of this section (two classes), you will be able to \n",
+        "    - Represent geographic vector objects in Python using the `shapely` library\n",
+        "    - Understand the basic data structures and methods of geopandas GeoDataFrames\n",
+        "    - Execute common geometric operations with points, lines and polygons\n",
+        "    - Spatial join operations\n",
+        "\n",
+        "## Textbook\n",
+        "\n",
+        "[Introduction to Python for Geographic Data Analysis](https://pythongis.org) by Henrikki Tenkanen, Vuokko Heikinheimo & David Whipp\n",
+        "\n",
+        "Book has three parts:\n",
+        "\n",
+        "1.  Intro to Python (you know this already)\n",
+        "2.  Intro to Geographical Information Systems (GIS) with Python\n",
+        "3.  Case Studies (this part is actually not written yet)\n",
+        "\n",
+        "We are going to teach material from Chapters 5 and 6 in Section 2.\n",
+        "\n",
+        "## `requirements.txt`\n",
+        "\n",
+        "(We will elaborate more on what this file is in minilesson on Wednesday)\n",
+        "\n",
+        "`shapely` -- Manipulation and analysis of geometric objects in the Cartesian plane.\n",
+        "\n",
+        "`geopandas` -- Geometric objects nested within a standard pandas data frame\n"
+      ],
+      "id": "fbe18be9"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import shapely\n",
+        "from shapely import Polygon, Point"
+      ],
+      "id": "fbeec0ee",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import sys\n",
+        "print(sys.path)"
+      ],
+      "id": "ea79ad73",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Vector vs raster data\n",
+        "\n",
+        "![](pictures/vector_vs_raster.jpg){height=\"80%\"}\n",
+        "\n",
+        "**Vector** data records points, lines and shapes. **Raster** data records pixels. \n",
+        "\n",
+        "Discussion question -- brainstorm examples of each type of data.\n",
+        "\n",
+        "\n",
+        "## Examples of vector data\n",
+        "\n",
+        "![](pictures/vector_data_model.jpg){height=\"100%\"}\n",
+        "\n",
+        "The numbers are called **well-known text**: a version of the data which is easily interpretable to a human. We will discuss how to read these shortly!\n",
+        "\n",
+        "\n",
+        "\n",
+        "## Attribute data\n",
+        "\n",
+        "In virtually every example, we will associate **attribute** data with vectors -- these are what might appear in a table in a standard dataframe, but now the data is associated with a point, line, or shape.\n",
+        "\n",
+        "Examples of data that would associate with a *point*:\n",
+        "\n",
+        "* particulate matter (pollution)\n",
+        "* temperature\n",
+        "* altitude\n",
+        "\n",
+        "Discussion question: what type of data would you associate with...\n",
+        "\n",
+        "1.  ...a building?\n",
+        "2.  ...a geographic area?\n",
+        "\n",
+        "## Intro: summary\n",
+        "\n",
+        "- vector data\n",
+        "- raster data\n",
+        "- attribute data\n",
+        "- The spatial lectures here will focus on vector and attribute data because of time limitations.\n",
+        "\n",
+        "# Representing geographic data in vector format (6.1)\n",
+        "\n",
+        "## geo data in vectors: roadmap\n",
+        "\n",
+        "-   `Point`\n",
+        "-   `LineString`\n",
+        "-   `Polygon`\n",
+        "\n",
+        "Within each data type, we will cover creation, Well Known Text (WKT), and coordinates. \n",
+        "\n",
+        "*Note: when working with spatial data, we typically will not start by creating the shapes themselves. But it is important to understand them because they form the basis of spatial data and all spatial transformation is just manipulating the underlying vectors.*\n",
+        "\n",
+        "\n",
+        "## `Point`: creating geometries\n"
+      ],
+      "id": "2acf2247"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "from shapely import Point\n",
+        "\n",
+        "point = Point(2.2, 4.2)\n",
+        "point"
+      ],
+      "id": "5bbd0ebc",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import sys\n",
+        "print(sys.executable)\n"
+      ],
+      "id": "bc6c0e74",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## `Point`: Well Known Text (WKT) representation\n"
+      ],
+      "id": "b54cc812"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "print(point) #extracts WKT\n",
+        "point.wkt    #gets WKT directly\n",
+        "\n",
+        "point3D = Point(9.26, -2.456, 0.57)\n",
+        "print(point3D)"
+      ],
+      "id": "db095dca",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "* `WKT` gives you a plaintext representation of where the point is. \n",
+        "* It contrasts with Well Known Binary (`WKB`) which stores geo data in the way which is most efficient for the computer. \n",
+        "    * Wikipedia has some nice [examples](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) of how the same point is stored by WKT and WKB.\n",
+        "\n",
+        "## `Point`: Coordinate representation\n"
+      ],
+      "id": "8f5618d8"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "type(point.coords)"
+      ],
+      "id": "92a47ab5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "list(point.coords)"
+      ],
+      "id": "cdd6cbe5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "When the object is a `Point`, the `WKT` looks very similar to the coordinates. As the objects get more complicated, the formatting of `WKT` starts to deviate from coordinates. \n",
+        "\n",
+        "## `Point`: extraction methods\n"
+      ],
+      "id": "6d985d5c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "print(point.x)"
+      ],
+      "id": "ccc1ba8d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "print(point.xy)"
+      ],
+      "id": "5f0f0c0e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## `LineString`: creating geometries\n"
+      ],
+      "id": "79b03e50"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "from shapely import Point, LineString\n",
+        "\n",
+        "point1 = Point(2.2, 4.2)\n",
+        "point2 = Point(7.2, -25.1)\n",
+        "point3 = Point(9.26, -2.456)\n",
+        "\n",
+        "line = LineString([point1, point2, point3])\n",
+        "line_from_tuples = LineString([(2.2, 4.2), (7.2, -25.1), (9.26, -2.456)])\n",
+        "line"
+      ],
+      "id": "72ad6e39",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## `LineString`: creation syntax\n",
+        "\n",
+        "These two input methods produce the same output. No \"right\" way. Use whichever way is more convenient in your application.\n"
+      ],
+      "id": "5b340653"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "line = LineString([point1, point2, point3])\n",
+        "\n",
+        "line_from_tuples = LineString([(2.2, 4.2), (7.2, -25.1), (9.26, -2.456)])"
+      ],
+      "id": "5953cd3e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## `LineString` discussion questions\n",
+        "\n",
+        "1.  What output should we expect if we run `print(line)`? Write down your guess on your MUD card before you run it at the computer.\n",
+        "2.  How can you access the Well Known Text representation?\n",
+        "\n",
+        "\n",
+        "## `LineString` coordinate representation\n"
+      ],
+      "id": "75f84361"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "list(line.coords)"
+      ],
+      "id": "278e11be",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## `LineString` attributes"
+      ],
+      "id": "386fe15b"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "xcoords = list(line.xy[0])\n",
+        "ycoords = list(line.xy[1])\n",
+        "\n",
+        "print(xcoords)\n",
+        "print(ycoords)"
+      ],
+      "id": "f6ca0f05",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## `LineString` attributes, continued\n",
+        "Length is the sum of distances between consecutive points. \n"
+      ],
+      "id": "a17413f4"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "length = line.length\n",
+        "print(f\"Length of our line: {length:.2f} units\")"
+      ],
+      "id": "fb290261",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## `Polygon`: creating geometries\n"
+      ],
+      "id": "88dfc4af"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "from shapely import Polygon\n",
+        "poly = Polygon([point1, point2, point3])\n",
+        "poly"
+      ],
+      "id": "28ea3f8c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## `Polygon`: WKT\n"
+      ],
+      "id": "899ec6a9"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "poly.wkt"
+      ],
+      "id": "e6ff1c8f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Note the double parentheses. In contrast:\n"
+      ],
+      "id": "5d6f7e7a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "line.wkt"
+      ],
+      "id": "c6073e4f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## `Polygon`: attributes\n"
+      ],
+      "id": "79ac7dda"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "print(\"Polygon centroid: \", poly.centroid)\n",
+        "poly.centroid"
+      ],
+      "id": "7757e43d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "print(\"Polygon Area: \", poly.area)\n",
+        "poly.area "
+      ],
+      "id": "1b9b4269",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "print(\"Polygon Bounding Box: \", poly.bounds)\n",
+        "poly.bounds"
+      ],
+      "id": "b9549c4f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "print(\"Polygon Exterior: \", poly.exterior)\n",
+        "poly.exterior"
+      ],
+      "id": "102f1078",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "`LinearRing` is similar to a `LineString`, but it it must be:\n",
+        "    1. a closed loop\n",
+        "    2. cannot intersect itself\n",
+        "\n",
+        "`Polygon`s can be easily formed from `LinearRing`s but not all `LineString`s can be transformed into polygons.\n"
+      ],
+      "id": "00264b5f"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "print(\"Polygon Exterior Length: \", poly.exterior.length)\n",
+        "poly.exterior.length"
+      ],
+      "id": "fb6aa41b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## `Polygon`: example II\n"
+      ],
+      "id": "f440f232"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "exterior = [(-180, 90), (-180, -90), (180, -90), (180, 90)]\n",
+        "poly_without_hole = Polygon(shell=exterior)\n",
+        "poly_without_hole"
+      ],
+      "id": "dcd17f2a",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "linestring_from_exterior = LineString(exterior)\n",
+        "linestring_from_exterior"
+      ],
+      "id": "601a8237",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## `Polygon`: example II with a hole\n"
+      ],
+      "id": "238453de"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Define the hole coordinates (a single hole in this case)\n",
+        "holes_coordinates = [[(-170, 80), (-170, -80), (170, -80), (170, 80)]]\n",
+        "poly_with_hole = Polygon(shell=exterior, holes=holes_coordinates)\n",
+        "poly_with_hole"
+      ],
+      "id": "426893fc",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Do-pair-Share\n",
+        "\n",
+        "1.  Create a triangle\n",
+        "2.  Create a square\n",
+        "3.  Create a circle (hint: look up the `buffer` method in `shapely`)\n",
+        "\n",
+        "\n",
+        "## geo data in vectors: summary\n",
+        "\n",
+        "| Data type    | Well-known text (WKT)                  |\n",
+        "|--------------|----------------------------------------|\n",
+        "| `Point`      | `(25 60.5)`                            |\n",
+        "| `LineString` | `(24.5 61, 25 60.5, 25.5 61)`          |\n",
+        "| `Polygon`    | `((24.5 61, 25 60.5, 25.5 61, 24.5 61))` |\n",
+        "\n",
+        "Methods\n",
+        "\n",
+        "-   any type: `.coords`, `.x`, `.xy`, `.wkt`\n",
+        "-   `LineString` or `Polygon`: `.centroid`, `.length`\n",
+        "-   `Polygon`: `.bounds`, `.area`, `.exterior`"
+      ],
+      "id": "4a489ae9"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "/Users/justinesilverstein/Library/Python/3.9/share/jupyter/kernels/python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

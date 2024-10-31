@@ -76,6 +76,11 @@ import shapely
 from shapely import Polygon, Point
 ```
 
+```{python}
+import sys
+print(sys.path)
+```
+
 ## Vector vs raster data
 
 ![](pictures/vector_vs_raster.jpg){height="80%"}
@@ -135,6 +140,14 @@ from shapely import Point
 
 point = Point(2.2, 4.2)
 point
+```
+
+```{python}
+
+import sys
+print(sys.executable)
+
+
 ```
 
 ## `Point`: Well Known Text (WKT) representation
